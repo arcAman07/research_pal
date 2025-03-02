@@ -5,6 +5,7 @@ from typing import Dict, List, Optional, Any, Union
 import json
 import hashlib
 from datetime import datetime
+import re
 
 from ..core.pdf_processor import PDFProcessor
 from ..core.llm_interface import LLMInterface
