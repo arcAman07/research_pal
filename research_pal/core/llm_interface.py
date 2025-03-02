@@ -455,60 +455,71 @@ class LLMInterface:
         Returns:
             Comprehensive paper summary
         """
+        # Helper function to convert any value to a string
+        def ensure_str(val):
+            if isinstance(val, str):
+                return val
+            elif isinstance(val, list):
+                return "\n".join([ensure_str(item) for item in val])
+            elif isinstance(val, dict):
+                return json.dumps(val, indent=2)
+            else:
+                return str(val)
+        
         # Combine all summaries
-        combined_summary = "\n\n".join([s.get("SUMMARY", "") for s in summaries])
+        combined_summary = "\n\n".join([ensure_str(s.get("SUMMARY", "")) for s in summaries])
         
         # Collect all key findings
         key_findings = []
         for summary in summaries:
             findings = summary.get("KEY_FINDINGS", [])
             if isinstance(findings, list):
-                key_findings.extend(findings)
-            elif isinstance(findings, str):
-                key_findings.append(findings)
+                key_findings.extend([ensure_str(item) for item in findings])
+            else:
+                key_findings.append(ensure_str(findings))
         
-        # Collect technical details - handle both string and list types
+        # Collect technical details - handle all possible types
         tech_details_list = []
         for s in summaries:
             if s.get("TECHNICAL_DETAILS"):
                 tech_detail = s.get("TECHNICAL_DETAILS")
                 if isinstance(tech_detail, list):
-                    tech_details_list.extend(tech_detail)
+                    tech_details_list.extend([ensure_str(item) for item in tech_detail])
                 else:
-                    tech_details_list.append(tech_detail)
+                    tech_details_list.append(ensure_str(tech_detail))
         tech_details = "\n\n".join(tech_details_list)
         
-        # Collect math formulations - handle both string and list types
+        # Collect math formulations - handle all possible types
         math_formulations_list = []
         for s in summaries:
             if s.get("MATH_FORMULATIONS"):
                 math_formulation = s.get("MATH_FORMULATIONS")
                 if isinstance(math_formulation, list):
-                    math_formulations_list.extend(math_formulation)
+                    math_formulations_list.extend([ensure_str(item) for item in math_formulation])
                 else:
-                    math_formulations_list.append(math_formulation)
+                    math_formulations_list.append(ensure_str(math_formulation))
         math_formulations = "\n\n".join(math_formulations_list)
         
-        # Collect architecture details - handle both string and list types
+        # Collect architecture details - handle all possible types
         architecture_details_list = []
         for s in summaries:
             if s.get("ARCHITECTURE_DETAILS"):
                 arch_detail = s.get("ARCHITECTURE_DETAILS")
                 if isinstance(arch_detail, list):
-                    architecture_details_list.extend(arch_detail)
+                    architecture_details_list.extend([ensure_str(item) for item in arch_detail])
                 else:
-                    architecture_details_list.append(arch_detail)
+                    architecture_details_list.append(ensure_str(arch_detail))
         architecture_details = "\n\n".join(architecture_details_list)
         
-        # Collect results - handle both string and list types
+        # Collect results - handle all possible types
         results_list = []
         for s in summaries:
             if s.get("RESULTS"):
                 result = s.get("RESULTS")
                 if isinstance(result, list):
-                    results_list.extend(result)
+                    results_list.extend([ensure_str(item) for item in result])
                 else:
-                    results_list.append(result)
+                    results_list.append(ensure_str(result))
         results = "\n\n".join(results_list)
         
         # Now generate a comprehensive summary using another LLM call
@@ -631,7 +642,7 @@ class LLMInterface:
             Dictionary with comprehensive analysis sections
         """
         # Import the prompt here to avoid circular imports
-        from research_pal.prompts import COMPREHENSIVE_ANALYSIS_PROMPT
+        from research_pal.core.prompts import COMPREHENSIVE_ANALYSIS_PROMPT
         
         system_message = COMPREHENSIVE_ANALYSIS_PROMPT
         
