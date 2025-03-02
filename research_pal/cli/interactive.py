@@ -839,7 +839,7 @@ class InteractiveShell(cmd.Cmd):
         """
         Summarize a new paper.
         
-        Usage: summarize <pdf_path> [--code] [--blog] [--blog-style <style_path>] [--model <model_name>] [--token-limit <limit>] [--force]
+        Usage: summarize <pdf_path> [options]
         
         Options:
         --code            Generate implementation code
@@ -848,6 +848,7 @@ class InteractiveShell(cmd.Cmd):
         --model           Specify LLM model to use
         --token-limit     Set custom token limit
         --force           Re-summarize even if already in database
+        --output          Specify path to save the summary
         """
         try:
             args = shlex.split(arg)
@@ -856,6 +857,9 @@ class InteractiveShell(cmd.Cmd):
                 return
             
             pdf_path = args[0]
+
+            # Parse options (other option parsing code remains the same)
+            force = "--force" in args
             
             # Parse options
             code = "--code" in args
@@ -864,6 +868,7 @@ class InteractiveShell(cmd.Cmd):
             blog_style_text = ""
             token_limit = None
             force = "--force" in args
+            output_path = None
             
             if "--model" in args:
                 idx = args.index("--model")
@@ -889,28 +894,45 @@ class InteractiveShell(cmd.Cmd):
                         console.print(f"[red]Failed to read blog style file: {e}[/red]")
                         return
             
+            # Add handling for output path
+            if "--output" in args:
+                idx = args.index("--output")
+                if idx + 1 < len(args):
+                    output_path = args[idx + 1]
+                    # Make sure directory exists
+                    output_dir = os.path.dirname(output_path)
+                    if output_dir:
+                        os.makedirs(output_dir, exist_ok=True)
+            
             # Check if file exists
             if not os.path.exists(pdf_path):
                 console.print(f"[red]PDF file not found: {pdf_path}[/red]")
                 return
             
-            # Check if this paper is already processed
+            # Check if this paper is already processed - FIXED VERSION
             if not force:
                 paper_filename = os.path.basename(pdf_path)
                 with console.status(f"[bold blue]Checking if already processed...[/bold blue]", spinner="dots12"):
                     # Search for papers with similar filename
-                    # This is a simple check - in a production system, we would use more robust methods
                     existing_papers = self.summarizer.search_papers(paper_filename, n_results=5)
                     
                     # Check if any existing paper has the same filepath
                     for paper in existing_papers:
-                        if paper.get("filepath") == pdf_path:
-                            console.print(f"[yellow]This paper has already been processed (ID: {paper.get('paper_id')}).[/yellow]")
+                        paper_filepath = paper.get("filepath", "")
+                        paper_id = paper.get("paper_id", "")
+                        
+                        # Skip if paper_id is None or empty
+                        if not paper_id:
+                            continue
+                            
+                        # Compare normalized paths
+                        if os.path.normpath(paper_filepath) == os.path.normpath(pdf_path):
+                            console.print(f"[yellow]This paper has already been processed (ID: {paper_id}).[/yellow]")
                             console.print("Use the --force flag to reprocess it, or 'open' to view the existing summary.")
                             
                             # Ask if the user wants to open the existing paper
                             if console.input(f"Open existing summary? [y/N]: ").lower().strip() == "y":
-                                self.do_open(paper.get("paper_id"))
+                                self.do_open(paper_id)
                             return
             
             # Run summarization
@@ -938,9 +960,49 @@ class InteractiveShell(cmd.Cmd):
                 self.current_paper_id = result["paper_id"]
                 self.current_paper = result
                 
+                # Add to paper history
+                self._add_to_paper_history(result["paper_id"])
+                
                 console.print(f"\n[bold green]Paper summarized and set as current paper.[/bold green]")
                 console.print(f"[bold]Paper ID:[/bold] {result['paper_id']}")
                 console.print(f"[bold]Domain:[/bold] {result.get('domain', 'Unknown')}")
+                
+                # Save to specified output path if provided
+                if output_path:
+                    with open(output_path, "w") as f:
+                        # Write the paper summary as markdown
+                        f.write(f"# {result['title']}\n\n")
+                        f.write(f"**Domain:** {result.get('domain', 'Unknown')}\n\n")
+                        f.write(f"**Paper ID:** {result['paper_id']}\n\n")
+                        f.write("## Summary\n\n")
+                        f.write(f"{result.get('summary', '')}\n\n")
+                        
+                        # Write takeaways
+                        f.write("## Key Takeaways\n\n")
+                        takeaways = result.get('takeaways', [])
+                        if isinstance(takeaways, list):
+                            for takeaway in takeaways:
+                                f.write(f"- {takeaway}\n")
+                        else:
+                            f.write(f"{takeaways}\n")
+                        
+                        # Add more sections as needed
+                        for section_title, section_key in [
+                            ("Problem Statement", "problem_statement"),
+                            ("Methodology", "methodology"),
+                            ("Architecture", "architecture"),
+                            ("Key Results", "key_results"),
+                            ("Implications", "implications"),
+                            ("Future Directions", "future_directions"),
+                            ("Background", "background"),
+                            ("Mathematical Formulations", "math_formulations"),
+                        ]:
+                            content = result.get(section_key, "")
+                            if content:
+                                f.write(f"\n## {section_title}\n\n")
+                                f.write(f"{content}\n")
+                    
+                    console.print(f"\n[green]Summary saved to:[/green] {output_path}")
                 
                 # Save generated code if requested
                 if code and "code_implementation" in result:
@@ -1251,6 +1313,66 @@ def do_help(self, arg):
         else:
             console.print(f"[yellow]Current debug status: {'Enabled' if self.debug else 'Disabled'}[/yellow]")
             console.print("Usage: debug on|off")
+
+    def do_export(self, arg):
+        """
+        Export the current paper summary to a file.
+        
+        Usage: export <file_path>
+        """
+        if not self.current_paper:
+            console.print("[red]No paper currently open. Use 'open <paper_id>' first.[/red]")
+            return
+        
+        file_path = arg.strip()
+        if not file_path:
+            console.print("[red]No file path provided.[/red]")
+            console.print("Usage: export <file_path>")
+            return
+        
+        try:
+            # Ensure directory exists
+            os.makedirs(os.path.dirname(os.path.abspath(file_path)), exist_ok=True)
+            
+            with open(file_path, 'w') as f:
+                # Write the paper summary as markdown
+                f.write(f"# {self.current_paper.get('title', 'Unknown Title')}\n\n")
+                f.write(f"**Domain:** {self.current_paper.get('domain', 'Unknown')}\n\n")
+                f.write(f"**Paper ID:** {self.current_paper_id}\n\n")
+                f.write("## Summary\n\n")
+                f.write(f"{self.current_paper.get('summary', '')}\n\n")
+                
+                # Write takeaways
+                f.write("## Key Takeaways\n\n")
+                takeaways = self.current_paper.get('takeaways', [])
+                if isinstance(takeaways, list):
+                    for takeaway in takeaways:
+                        f.write(f"- {takeaway}\n")
+                else:
+                    f.write(f"{takeaways}\n")
+                
+                # Add more sections as needed
+                for section_title, section_key in [
+                    ("Problem Statement", "problem_statement"),
+                    ("Methodology", "methodology"),
+                    ("Architecture", "architecture"),
+                    ("Key Results", "key_results"),
+                    ("Future Directions", "future_directions"),
+                ]:
+                    content = self.current_paper.get(section_key, "")
+                    if content:
+                        f.write(f"\n## {section_title}\n\n")
+                        f.write(f"{content}\n")
+            
+            console.print(f"[green]Summary exported to:[/green] {file_path}")
+        
+        except Exception as e:
+            if self.debug:
+                console.print(f"[red]Error exporting summary: {str(e)}[/red]")
+                import traceback
+                console.print(traceback.format_exc())
+            else:
+                console.print(f"[red]Error exporting summary: {str(e)}[/red]")
 
 
 def run_interactive_shell(config_path=None, debug=False, minimal=False, theme="minimal", animation=True):
