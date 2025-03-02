@@ -129,6 +129,7 @@ research_pal/
     ├── __init__.py
     ├── display.py      # Display functions
     └── enhanced_display.py # Advanced UI
+    └── config.py # LLM configurations
 ```
 
 ## 📋 Requirements
