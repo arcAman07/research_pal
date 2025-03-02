@@ -19,9 +19,10 @@ DEFAULT_CONFIG = {
     "default_model": "gpt-4o-mini",
     "output_token_limit": 4096,
     "db_path": os.path.expanduser("~/.research_pal/chroma_db"),
-    "output_dir": os.path.expanduser("~/research_pal_output")
+    "output_dir": os.path.expanduser("~/research_pal_output"),
+    "theme": "minimal",            # Set default theme to minimal
+    "disable_animations": True     # Disable animations by default
 }
-
 def load_config(config_path: Optional[str] = None) -> Dict[str, Any]:
     """
     Load configuration from file.

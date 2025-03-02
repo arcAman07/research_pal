@@ -1,4 +1,4 @@
-# research_pal/cli/main.py (update imports)
+# research_pal/cli/main.py
 #!/usr/bin/env python3
 """
 ResearchPal: Main entry point for the CLI application.
@@ -22,11 +22,8 @@ from research_pal.core.summarizer import PaperSummarizer
 from research_pal.core.llm_interface import LLMInterface
 from research_pal.db.chroma_manager import ChromaManager
 from research_pal.cli.interactive import InteractiveShell, run_interactive_shell
-# Update import here
 from research_pal.utils.ui_themes import display_fancy_logo, get_fancy_prompt, set_theme
 from research_pal.utils.config import CONFIG_PATH, load_config, save_config, DEFAULT_CONFIG
-
-# Rest of the file remains the same...
 
 # Set up logging
 logging.basicConfig(
@@ -68,8 +65,8 @@ def check_environment():
 
 @click.group()
 @click.option('--debug/--no-debug', default=False, help='Enable debug logging.')
-@click.option('--theme', type=click.Choice(['cyberpunk', 'matrix', 'midnight']), default='cyberpunk', 
-              help='Choose UI color theme.')
+@click.option('--theme', type=click.Choice(['cyberpunk', 'matrix', 'midnight', 'minimal', 'professional']), 
+              default='minimal', help='Choose UI color theme.')
 @click.pass_context
 def cli(ctx, debug, theme):
     """ResearchPal: A CLI tool for managing research papers."""
@@ -94,7 +91,7 @@ def configure(ctx, config_path):
     config = load_config(config_path)
     
     # Display logo first
-    display_fancy_logo(console, theme=ctx.obj['THEME'])
+    display_fancy_logo(console, theme=ctx.obj['THEME'], animated=False)
     
     # Prompt for configuration values
     console.print("\n[bold]ResearchPal Configuration[/bold]\n")
@@ -118,6 +115,14 @@ def configure(ctx, config_path):
     console.print("\n[bold]Output Settings:[/bold]")
     output_dir = click.prompt("Default Output Directory", default=config.get("output_dir", DEFAULT_CONFIG["output_dir"]))
     
+    console.print("\n[bold]UI Settings:[/bold]")
+    theme = click.prompt("UI Theme", 
+                         default=config.get("theme", ctx.obj['THEME']),
+                         type=click.Choice(["cyberpunk", "matrix", "midnight", "minimal", "professional"]))
+    
+    disable_animations = click.confirm("Disable animations?", 
+                                      default=config.get("disable_animations", config.get("theme") in ["minimal", "professional"]))
+    
     # Update config
     config.update({
         "openai_api_key": openai_api_key,
@@ -125,7 +130,9 @@ def configure(ctx, config_path):
         "default_model": default_model,
         "output_token_limit": output_token_limit,
         "db_path": db_path,
-        "output_dir": output_dir
+        "output_dir": output_dir,
+        "theme": theme,
+        "disable_animations": disable_animations
     })
     
     # Save config
@@ -140,21 +147,32 @@ def configure(ctx, config_path):
     
     # Ask user if they want to enter the shell
     if click.confirm("\nDo you want to enter the interactive shell now?", default=True):
-        ctx.invoke(shell, config_path=config_path, minimal=False)
+        ctx.invoke(shell, config_path=config_path, minimal=(theme in ["minimal", "professional"]))
 
 @cli.command()
 @click.option('--config-path', '-c', default=CONFIG_PATH, help='Path to configuration file.')
-@click.option('--minimal/--no-minimal', default=False, help='Use minimal UI design.')
-@click.option('--no-animation/--animation', default=False, help='Disable startup animation.')
+@click.option('--minimal/--no-minimal', default=None, help='Use minimal UI design.')
+@click.option('--no-animation/--animation', default=None, help='Disable startup animation.')
 @click.pass_context
 def shell(ctx, config_path, minimal, no_animation):
     """Start the interactive shell."""
     # Check environment setup
     check_environment()
     
+    # Load config to check for user preferences
+    config = load_config(config_path)
+    
+    # Set minimal mode based on theme if not explicitly specified
+    if minimal is None:
+        minimal = config.get("theme") in ["minimal", "professional"]
+    
+    # Use config's animation setting if not specified in command
+    if no_animation is None:
+        no_animation = config.get("disable_animations", False)
+    
     # Pass debug flag, theme, and animation settings to the shell
     debug = ctx.obj.get('DEBUG', False)
-    theme = ctx.obj.get('THEME', 'cyberpunk')
+    theme = ctx.obj.get('THEME', config.get("theme", "minimal"))
     animation = not no_animation
     
     # Run the interactive shell
@@ -192,7 +210,7 @@ def version():
 def test(ctx, file_path, test_api):
     """Test file processing and API connectivity."""
     # Display logo
-    display_fancy_logo(console, theme=ctx.obj['THEME'])
+    display_fancy_logo(console, theme=ctx.obj['THEME'], animated=False)
     
     if test_api:
         console.print("[bold]Testing API Connectivity...[/bold]")

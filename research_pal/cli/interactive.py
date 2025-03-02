@@ -34,7 +34,7 @@ class InteractiveShell(cmd.Cmd):
     
     intro = "Welcome to the ResearchPal interactive shell. Type 'help' for available commands."
     
-    def __init__(self, config_path: str = None, debug: bool = False, minimal: bool = False, theme: str = "cyberpunk"):
+    def __init__(self, config_path: str = None, debug: bool = False, minimal: bool = False, theme: str = "minimal"):
         """Initialize the interactive shell."""
         super().__init__()
         
@@ -70,6 +70,13 @@ class InteractiveShell(cmd.Cmd):
         
         # Set default model from config
         default_model = self.config.get("default_model")
+        
+        # Use theme from config if provided
+        config_theme = self.config.get("theme")
+        if config_theme and not theme:
+            self.theme = config_theme
+            set_theme(self.theme)
+            self.prompt = get_fancy_prompt(self.theme)
         
         # Set default output token limit
         self.output_token_limit = self.config.get("output_token_limit", 4096)
@@ -115,9 +122,9 @@ class InteractiveShell(cmd.Cmd):
         """
         Change the UI theme.
         
-        Usage: theme [cyberpunk|matrix|midnight]
+        Usage: theme [cyberpunk|matrix|midnight|minimal|professional]
         """
-        themes = ["cyberpunk", "matrix", "midnight"]
+        themes = ["cyberpunk", "matrix", "midnight", "minimal", "professional"]
         
         if not arg or arg not in themes:
             console.print(f"[red]Please specify a valid theme: {', '.join(themes)}[/red]")
@@ -781,8 +788,8 @@ class InteractiveShell(cmd.Cmd):
             with open(code_path, "w") as f:
                 f.write(code)
             
-            console.print(f"\n[green]Implementation code saved to {code_path}[/green]")
-            
+            console.print(f"[green]Code implementation saved to:[/green] {code_path}")
+
             # Update paper in database
             self.summarizer.update_paper_field(
                 paper_id=paper_id,
@@ -824,7 +831,7 @@ class InteractiveShell(cmd.Cmd):
             
             # Update current paper
             self.current_paper["blog_post"] = blog_post
-    
+        
     def do_help(self, arg):
         """Show help message."""
         if arg:
@@ -848,7 +855,7 @@ class InteractiveShell(cmd.Cmd):
             ("summarize <pdf_path>", "Summarize a new paper"),
             ("summarize <pdf_path> [--token-limit <limit>]", "Summarize with custom token limit"),
             ("generate code|blog", "Generate code implementation or blog post for current paper"),
-            ("theme <theme_name>", "Change the UI theme (cyberpunk, matrix, midnight)"),
+            ("theme <theme_name>", "Change the UI theme (cyberpunk, matrix, midnight, minimal, professional)"),
             ("clear", "Clear the screen"),
             ("refresh", "Refresh the display (show logo)"),
             ("exit, quit", "Exit the interactive shell"),
@@ -860,10 +867,20 @@ class InteractiveShell(cmd.Cmd):
         
         console.print("\nUse 'help <command>' for more information on a specific command.")
 
-def run_interactive_shell(config_path=None, debug=False, minimal=False, theme="cyberpunk", animation=True):
+
+def run_interactive_shell(config_path=None, debug=False, minimal=False, theme="minimal", animation=True):
     """Run the interactive shell."""
-    # Display animated logo with fancier animation
-    display_fancy_logo(console, animated=animation, theme=theme)
+    # Check if we should show animation - respect both parameter and config
+    config = load_config(config_path)
+    disable_animations = config.get("disable_animations", False)
+    show_animation = animation and not disable_animations
+    
+    # If no theme specified, use from config
+    if config.get("theme") and theme == "minimal":
+        theme = config.get("theme")
+    
+    # Display animated logo with fancier animation (or simple logo for minimal theme)
+    display_fancy_logo(console, animated=show_animation, theme=theme)
     
     # Initialize and run the shell
     shell = InteractiveShell(config_path, debug=debug, minimal=minimal, theme=theme)
