@@ -41,13 +41,30 @@ class PaperSummarizer:
         self.output_token_limit = output_token_limit
     
     def _generate_paper_id(self, filepath: str, title: str) -> str:
-        """Generate a unique ID for a paper based on filepath and title."""
+        """
+        Generate a unique ID for a paper based on filepath and title.
+        
+        More robust implementation that handles variations better.
+        
+        Args:
+            filepath: Path to the PDF file
+            title: Paper title
+            
+        Returns:
+            A unique paper ID
+        """
         # Use filename if available, otherwise use title
         filename = os.path.basename(filepath)
-        base = filename if filename else title
         
-        # Create a hash of the base string
-        hash_obj = hashlib.md5(base.encode())
+        # Combine filename and title for better uniqueness
+        combined = f"{filename}_{title}"
+        
+        # Remove special characters and normalize spaces
+        combined = re.sub(r'[^\w\s]', '', combined)
+        combined = re.sub(r'\s+', '_', combined.strip()).lower()
+        
+        # Create a hash of the combined string
+        hash_obj = hashlib.md5(combined.encode())
         paper_id = hash_obj.hexdigest()[:10]
         
         return paper_id
@@ -105,6 +122,60 @@ class PaperSummarizer:
         except Exception as e:
             logger.error(f"Failed to determine paper domain: {e}")
             return "Unknown"
+    
+    def check_paper_exists(self, filepath: str) -> Optional[str]:
+        """
+        Check if a paper has already been processed by filepath.
+        
+        Args:
+            filepath: Path to the PDF file
+            
+        Returns:
+            Paper ID if found, None otherwise
+        """
+        try:
+            # Normalize the filepath to handle path variations
+            normalized_path = os.path.abspath(os.path.expanduser(filepath))
+            
+            # A more robust approach would be to add a unique index on filepaths in the DB,
+            # but for now, we'll query all papers and check manually
+            filename = os.path.basename(normalized_path)
+            
+            # Search for papers with the same filename (not perfect but a start)
+            papers = self.search_papers(filename, n_results=20)
+            
+            for paper in papers:
+                # Get the stored filepath and normalize it too
+                paper_path = paper.get("filepath", "")
+                if paper_path:
+                    paper_path = os.path.abspath(os.path.expanduser(paper_path))
+                    
+                    # Check if paths match
+                    if paper_path == normalized_path:
+                        return paper.get("paper_id")
+                    
+                    # Also check if filenames match exactly (as a fallback)
+                    if os.path.basename(paper_path) == os.path.basename(normalized_path):
+                        # Check if the titles are similar (use fuzzy matching if available)
+                        paper_title = paper.get("title", "")
+                        
+                        # For now, just a simple check
+                        if paper_title and len(paper_title) > 5:
+                            # Get metadata from the file to check title
+                            extracted_data = self.pdf_processor.extract_and_chunk(normalized_path)
+                            metadata = extracted_data.get("metadata", {})
+                            title = metadata.get("title", "")
+                            
+                            # Simple similarity check
+                            if title and paper_title in title or title in paper_title:
+                                return paper.get("paper_id")
+            
+            # Not found
+            return None
+        
+        except Exception as e:
+            logger.error(f"Error checking if paper exists: {e}")
+            return None
     
     async def summarize_paper(self, 
                              filepath: str, 

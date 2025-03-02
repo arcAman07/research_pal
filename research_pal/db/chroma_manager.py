@@ -139,18 +139,45 @@ class ChromaManager:
         return result
     
     def search_papers(self, query: str, n_results: int = 5) -> List[Dict[str, Any]]:
-        """Search for papers using a text query."""
-        results = self.papers_collection.query(
-            query_texts=[query],
-            n_results=n_results
-        )
+        """
+        Search for papers using a text query.
         
-        papers = []
-        for i, paper_id in enumerate(results["ids"][0]):
-            paper = self.get_paper(paper_id)
-            papers.append(paper)
+        Args:
+            query: Search query text
+            n_results: Maximum number of results to return
             
-        return papers
+        Returns:
+            List of matching papers
+        """
+        # Check if this is a special query type
+        if query.lower().startswith("domain:"):
+            # Handle domain search separately
+            domain = query.split(":", 1)[1].strip()
+            return self.search_by_domain(domain, n_results=n_results)
+        
+        elif query.lower().startswith("title:"):
+            # Enhanced title search
+            title_query = query.split(":", 1)[1].strip()
+            return self.search_by_title(title_query, n_results=n_results)
+            
+        # Standard vector search
+        try:
+            results = self.papers_collection.query(
+                query_texts=[query],
+                n_results=n_results
+            )
+            
+            papers = []
+            for i, paper_id in enumerate(results["ids"][0]):
+                paper = self.get_paper(paper_id)
+                if paper:  # Ensure paper exists
+                    papers.append(paper)
+                
+            return papers
+        except Exception as e:
+            logger.error(f"Error searching papers: {e}")
+            # Return empty list on error
+            return []
     
     def search_by_domain(self, domain: str, n_results: int = 5) -> List[Dict[str, Any]]:
         """Search for papers by research domain."""
@@ -166,6 +193,65 @@ class ChromaManager:
             
         # Limit to requested number
         return papers[:n_results]
+    
+    def search_by_title(self, title_query: str, n_results: int = 5) -> List[Dict[str, Any]]:
+        """
+        Search for papers by title.
+        
+        Args:
+            title_query: Title search query
+            n_results: Maximum number of results to return
+            
+        Returns:
+            List of papers with matching titles
+        """
+        try:
+            # Two approaches for title search:
+            
+            # 1. Try metadata where filter first (more precise but requires exact match)
+            title_results = self.papers_collection.get(
+                where={"title": {"$contains": title_query}}
+            )
+            
+            # 2. Use vector search as backup (better semantic matching)
+            augmented_query = f"title: {title_query}"
+            vector_results = self.papers_collection.query(
+                query_texts=[augmented_query],
+                n_results=n_results
+            )
+            
+            # Combine results, prioritizing exact matches
+            paper_ids = set()
+            results = []
+            
+            # Add exact matches first
+            if title_results["ids"]:
+                for i, paper_id in enumerate(title_results["ids"]):
+                    if paper_id not in paper_ids:
+                        paper = self.get_paper(paper_id)
+                        if paper:
+                            results.append(paper)
+                            paper_ids.add(paper_id)
+            
+            # Add vector matches
+            if "ids" in vector_results and vector_results["ids"]:
+                for i, paper_id in enumerate(vector_results["ids"][0]):
+                    if paper_id not in paper_ids and len(results) < n_results:
+                        paper = self.get_paper(paper_id)
+                        if paper:
+                            results.append(paper)
+                            paper_ids.add(paper_id)
+            
+            # Sort results by relevance to the title query
+            # Simple sorting - title contains query gets priority
+            results.sort(key=lambda p: title_query.lower() in p.get("title", "").lower(), reverse=True)
+            
+            return results[:n_results]
+        
+        except Exception as e:
+            logger.error(f"Error searching papers by title: {e}")
+            # Return empty list on error
+            return []
     
     def update_paper_field(self, paper_id: str, field: str, value: Any) -> None:
         """Update a specific field for a paper."""
