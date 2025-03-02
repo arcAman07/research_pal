@@ -7,7 +7,7 @@
 </div>
 
 <p align="center">
-  <img src="docs/images/researchpal_logo.png" alt="ResearchPal Logo" width="300">
+  <img src="docs/images/researchpal_logo.svg" alt="ResearchPal Logo" width="300">
 </p>
 
 **ResearchPal** is your AI-powered research assistant for scientific literature. It helps you process, understand, and extract insights from research papers with ease.
