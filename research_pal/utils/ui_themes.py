@@ -1,4 +1,5 @@
-"""Enhanced ASCII logo and terminal UI for ResearchPal."""
+# research_pal/utils/ui_themes.py
+"""UI themes and enhanced display functionality for ResearchPal."""
 import os
 import sys
 import random
@@ -26,6 +27,19 @@ HOLOGRAPHIC_LOGO = """
     │                                                                │
     ╰────────────────────────────────────────────────────────────────╯
 """
+
+# Define CYBER_LOGO if it's referenced
+CYBER_LOGO = HOLOGRAPHIC_LOGO  # Or create a different logo design
+
+# Define these if they're referenced
+DOCUMENT_ICON = "📄"
+BRAIN_ICON = "🧠"
+SEARCH_ICON = "🔍"
+TIPS = [
+    "Tip: Use 'generate code' to create implementation code for a paper.",
+    "Tip: Try 'search domain:Computer Vision' to find papers in a specific domain.",
+    "Tip: Change the theme with 'theme matrix' or 'theme cyberpunk'."
+]
 
 # Color themes
 THEMES = {
