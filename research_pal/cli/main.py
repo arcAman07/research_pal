@@ -40,8 +40,8 @@ def check_environment():
     """Check if environment is properly set up."""
     # Check if required environment variables are set
     api_keys = {
-        "OPENAI_API_KEY": os.environ.get("OPENAI_API_KEY"),
-        "GOOGLE_API_KEY": os.environ.get("GOOGLE_API_KEY")
+        "GOOGLE_API_KEY": os.environ.get("GOOGLE_API_KEY"),
+        "OPENAI_API_KEY": os.environ.get("OPENAI_API_KEY")
     }
     
     missing_keys = [k for k, v in api_keys.items() if not v]
@@ -55,13 +55,17 @@ def check_environment():
                 os.environ[key] = config[key_lower]
                 missing_keys.remove(key)
     
-    # Still missing keys?
-    if missing_keys:
-        console.print(f"[yellow]Warning: The following API keys are missing: {', '.join(missing_keys)}[/yellow]")
-        console.print("[yellow]Some features may not work properly. Run 'research-pal configure' to set them up.[/yellow]")
+    # Check if we have at least one API key
+    if "GOOGLE_API_KEY" not in missing_keys:
+        return True  # We have Google API key, we're good to go
+    elif "OPENAI_API_KEY" not in missing_keys:
+        return True  # We have OpenAI API key, we're good to go
+    else:
+        console.print("[yellow]Warning: No API keys found. You need to configure at least one of these:[/yellow]")
+        console.print("[yellow]- Google API Key (for Gemini models)[/yellow]")
+        console.print("[yellow]- OpenAI API Key (for GPT models)[/yellow]")
+        console.print("[yellow]Run 'research-pal configure' to set them up.[/yellow]")
         return False
-    
-    return True
 
 @click.group()
 @click.option('--debug/--no-debug', default=False, help='Enable debug logging.')

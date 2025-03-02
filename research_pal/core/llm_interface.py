@@ -21,16 +21,33 @@ class LLMInterface:
         Args:
             default_model: Default model to use for queries
         """
-        # Determine default model
-        if default_model is None:
-            # Try to get from environment or use a reasonable default
-            self.default_model = os.environ.get("RESEARCHPAL_DEFAULT_MODEL", "gpt-4o-mini")
-        else:
-            self.default_model = default_model
-        
         # API keys should be set in environment variables
         self.openai_api_key = os.environ.get("OPENAI_API_KEY")
         self.google_api_key = os.environ.get("GOOGLE_API_KEY")
+        
+        # Determine default model based on available API keys
+        if default_model is None:
+            # If Google API key is available but OpenAI is not, use Gemini as default
+            if self.google_api_key and not self.openai_api_key:
+                self.default_model = "gemini-1.5-flash"
+            # If OpenAI API key is available or both are available, use OpenAI as default
+            else:
+                # Try to get from environment or use a reasonable default
+                self.default_model = os.environ.get("RESEARCHPAL_DEFAULT_MODEL", "gpt-4o-mini")
+        else:
+            self.default_model = default_model
+        
+        # Ensure default model aligns with available API keys
+        if "gemini" in self.default_model and not self.google_api_key:
+            logger.warning(f"Default model {self.default_model} requires Google API key which is not available")
+            if self.openai_api_key:
+                logger.warning(f"Switching to gpt-4o-mini")
+                self.default_model = "gpt-4o-mini"
+        elif "gpt" in self.default_model and not self.openai_api_key:
+            logger.warning(f"Default model {self.default_model} requires OpenAI API key which is not available")
+            if self.google_api_key:
+                logger.warning(f"Switching to gemini-1.5-flash")
+                self.default_model = "gemini-1.5-flash"
         
         # Model mappings and configurations
         self.model_configs = {
