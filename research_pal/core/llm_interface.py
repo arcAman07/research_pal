@@ -441,9 +441,9 @@ class LLMInterface:
             }
     
     async def merge_chunk_summaries(self, 
-                                   summaries: List[Dict[str, Any]], 
-                                   metadata: Dict[str, Any],
-                                   model: str = None) -> Dict[str, Any]:
+                               summaries: List[Dict[str, Any]], 
+                               metadata: Dict[str, Any],
+                               model: str = None) -> Dict[str, Any]:
         """
         Merge multiple chunk summaries into a cohesive full paper summary.
         
@@ -467,17 +467,49 @@ class LLMInterface:
             elif isinstance(findings, str):
                 key_findings.append(findings)
         
-        # Collect technical details
-        tech_details = "\n\n".join([s.get("TECHNICAL_DETAILS", "") for s in summaries if s.get("TECHNICAL_DETAILS")])
+        # Collect technical details - handle both string and list types
+        tech_details_list = []
+        for s in summaries:
+            if s.get("TECHNICAL_DETAILS"):
+                tech_detail = s.get("TECHNICAL_DETAILS")
+                if isinstance(tech_detail, list):
+                    tech_details_list.extend(tech_detail)
+                else:
+                    tech_details_list.append(tech_detail)
+        tech_details = "\n\n".join(tech_details_list)
         
-        # Collect math formulations
-        math_formulations = "\n\n".join([s.get("MATH_FORMULATIONS", "") for s in summaries if s.get("MATH_FORMULATIONS")])
+        # Collect math formulations - handle both string and list types
+        math_formulations_list = []
+        for s in summaries:
+            if s.get("MATH_FORMULATIONS"):
+                math_formulation = s.get("MATH_FORMULATIONS")
+                if isinstance(math_formulation, list):
+                    math_formulations_list.extend(math_formulation)
+                else:
+                    math_formulations_list.append(math_formulation)
+        math_formulations = "\n\n".join(math_formulations_list)
         
-        # Collect architecture details
-        architecture_details = "\n\n".join([s.get("ARCHITECTURE_DETAILS", "") for s in summaries if s.get("ARCHITECTURE_DETAILS")])
+        # Collect architecture details - handle both string and list types
+        architecture_details_list = []
+        for s in summaries:
+            if s.get("ARCHITECTURE_DETAILS"):
+                arch_detail = s.get("ARCHITECTURE_DETAILS")
+                if isinstance(arch_detail, list):
+                    architecture_details_list.extend(arch_detail)
+                else:
+                    architecture_details_list.append(arch_detail)
+        architecture_details = "\n\n".join(architecture_details_list)
         
-        # Collect results
-        results = "\n\n".join([s.get("RESULTS", "") for s in summaries if s.get("RESULTS")])
+        # Collect results - handle both string and list types
+        results_list = []
+        for s in summaries:
+            if s.get("RESULTS"):
+                result = s.get("RESULTS")
+                if isinstance(result, list):
+                    results_list.extend(result)
+                else:
+                    results_list.append(result)
+        results = "\n\n".join(results_list)
         
         # Now generate a comprehensive summary using another LLM call
         system_message = """You are ResearchPal, an expert research assistant specializing in scientific literature analysis.

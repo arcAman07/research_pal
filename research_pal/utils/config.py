@@ -16,12 +16,12 @@ CONFIG_PATH = os.path.join(CONFIG_DIR, "config.yaml")
 DEFAULT_CONFIG = {
     "openai_api_key": "",
     "google_api_key": "",
-    "default_model": "gpt-4o-mini",
+    "default_model": "gemini-1.5-flash",  # Changed default to Gemini
     "output_token_limit": 4096,
     "db_path": os.path.expanduser("~/.research_pal/chroma_db"),
     "output_dir": os.path.expanduser("~/research_pal_output"),
-    "theme": "minimal",            # Set default theme to minimal
-    "disable_animations": True     # Disable animations by default
+    "theme": "minimal",
+    "disable_animations": True
 }
 def load_config(config_path: Optional[str] = None) -> Dict[str, Any]:
     """
