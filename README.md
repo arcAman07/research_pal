@@ -28,14 +28,29 @@
 
 ### Installation
 
+#### Option 1: Install from PyPI
+
 ```bash
 pip install research-pal
 ```
 
+#### Option 2: Install from source
+
+```bash
+git clone https://github.com/username/research-pal.git
+cd research-pal
+pip install -e .
+```
+
 ### API Keys
 ResearchPal uses LLMs for analysis. You'll need at least one of these API keys:
-- OpenAI API Key (for GPT models)
-- Google API Key (for Gemini models)
+- [OpenAI API Key](https://platform.openai.com/account/api-keys) (for GPT models)
+- [Google API Key](https://ai.google.dev/) (for Gemini models)
+
+You can set the API keys in any of the following ways:
+1. Environment variables: Set `OPENAI_API_KEY` or `GOOGLE_API_KEY`
+2. Configuration file: Run `research-pal configure` to set up your API keys
+3. Directly in code when using as a library: Pass keys to the `LLMInterface` constructor
 
 ### Basic Usage
 
@@ -125,17 +140,86 @@ research_pal/
 ├── db/                 # Database management
 │   ├── __init__.py
 │   └── chroma_manager.py # Vector database
-└── utils/              # Utilities
+├── utils/              # Utilities
+│   ├── __init__.py
+│   ├── config.py       # Configuration handling
+│   ├── display.py      # Display functions
+│   └── ui_themes.py    # Advanced UI
+└── tests/              # Test suite
     ├── __init__.py
-    ├── display.py      # Display functions
-    └── enhanced_display.py # Advanced UI
-    └── config.py # LLM configurations
+    ├── conftest.py     # Test fixtures
+    ├── test_llm_interface.py
+    ├── test_pdf_processor.py
+    ├── test_summarizer.py
+    └── test_chroma_manager.py
 ```
+
+## 🧪 Development and Testing
+
+### Setting Up a Development Environment
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/username/research-pal.git
+   cd research-pal
+   ```
+
+2. Create a virtual environment:
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
+
+3. Install in development mode:
+   ```bash
+   pip install -e ".[dev]"
+   ```
+
+### Running the Tests
+
+Run the test suite to ensure everything is working correctly:
+
+```bash
+pytest
+```
+
+For more detailed test output:
+
+```bash
+pytest -v
+```
+
+For code coverage information:
+
+```bash
+pytest --cov=research_pal
+```
+
+### API Key Setup for Testing
+
+For testing, you can use any of these methods to set up your API keys:
+
+1. Create a `.env` file in the project root:
+   ```
+   OPENAI_API_KEY=your_openai_key_here
+   GOOGLE_API_KEY=your_google_key_here
+   ```
+
+2. Export as environment variables in your terminal:
+   ```bash
+   export OPENAI_API_KEY=your_openai_key_here
+   export GOOGLE_API_KEY=your_google_key_here
+   ```
+
+3. Use the configuration utility:
+   ```bash
+   research-pal configure
+   ```
 
 ## 📋 Requirements
 
 - Python 3.8+
-- Required packages:
+- Required packages (automatically installed):
   - rich
   - click
   - httpx
@@ -143,6 +227,10 @@ research_pal/
   - chromadb
   - pdfminer.six
   - pyyaml
+
+## 📖 Documentation
+
+Comprehensive documentation is available in the [docs](docs/) directory.
 
 ## 🤝 Contributing
 
