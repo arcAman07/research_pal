@@ -1,3 +1,4 @@
+# research_pal/cli/main.py (update imports)
 #!/usr/bin/env python3
 """
 ResearchPal: Main entry point for the CLI application.
@@ -21,8 +22,11 @@ from research_pal.core.summarizer import PaperSummarizer
 from research_pal.core.llm_interface import LLMInterface
 from research_pal.db.chroma_manager import ChromaManager
 from research_pal.cli.interactive import InteractiveShell, run_interactive_shell
-from research_pal.utils.enhanced_display import display_fancy_logo, get_fancy_prompt, set_theme
-from research_pal.config import CONFIG_PATH, load_config, save_config, DEFAULT_CONFIG
+# Update import here
+from research_pal.utils.ui_themes import display_fancy_logo, get_fancy_prompt, set_theme
+from research_pal.utils.config import CONFIG_PATH, load_config, save_config, DEFAULT_CONFIG
+
+# Rest of the file remains the same...
 
 # Set up logging
 logging.basicConfig(

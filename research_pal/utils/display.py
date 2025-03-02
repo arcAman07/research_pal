@@ -5,13 +5,10 @@ from rich.markdown import Markdown
 from rich.table import Table
 from typing import Dict, Any, List
 
-console = Console()
+# Update import here
+from research_pal.utils.ui_themes import get_theme_color
 
-def get_theme_color(color_key, theme=None):
-    """Get a color from the active theme."""
-    # Import here to avoid circular imports
-    from research_pal.utils.enhanced_display import get_theme_color as gtc
-    return gtc(color_key)
+console = Console()
 
 def display_logo():
     """Display the ResearchPal logo."""

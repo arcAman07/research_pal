@@ -22,9 +22,9 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from research_pal.core.summarizer import PaperSummarizer
 from research_pal.core.llm_interface import LLMInterface
 from research_pal.db.chroma_manager import ChromaManager
-from research_pal.utils.enhanced_display import display_fancy_logo, get_fancy_prompt, set_theme, get_theme_color
+from research_pal.utils.ui_themes import display_fancy_logo, get_fancy_prompt, set_theme, get_theme_color
 from research_pal.utils.display import display_summary
-from research_pal.config import load_config
+from research_pal.utils.config import load_config
 
 logger = logging.getLogger(__name__)
 console = Console()
