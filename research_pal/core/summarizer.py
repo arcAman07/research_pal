@@ -41,6 +41,18 @@ class PaperSummarizer:
         self.db_manager = db_manager or ChromaManager()
         self.output_token_limit = output_token_limit
     
+    # Add this helper function near the top of the file
+    def ensure_string(value):
+        """Ensure the value is a string."""
+        if isinstance(value, dict):
+            return json.dumps(value)  # Convert dictionary to JSON string
+        elif value is None:
+            return ""
+        elif isinstance(value, list):
+            return ", ".join(str(item) for item in value)
+        else:
+            return str(value)  # Convert to string if not already
+    
     def _generate_paper_id(self, filepath: str, title: str) -> str:
         """
         Generate a unique ID for a paper based on filepath and title.
@@ -62,7 +74,7 @@ class PaperSummarizer:
         
         # Remove special characters and normalize spaces
         combined = re.sub(r'[^\w\s]', '', combined)
-        combined = re.sub(r'\s+', '_', combined.strip()).lower()
+        combined = re.sub(r'\s+', '_', str(combined).strip()).lower()
         
         # Create a hash of the combined string
         hash_obj = hashlib.md5(combined.encode())
@@ -114,9 +126,15 @@ class PaperSummarizer:
             )
             
             # Clean up and simplify
-            domain = domain.strip().strip('"').strip("'")
+            if isinstance(domain, str):
+                domain = domain.strip().strip('"').strip("'")
+            else:
+                domain = str(domain)
             if len(domain) > 50:  # If it's too verbose, truncate
-                domain = domain.split(',')[0].split(' and ')[0].strip()
+                if isinstance(domain, str):
+                    domain = domain.split(',')[0].split(' and ')[0].strip()
+                else:
+                    domain = str(domain)
                 
             logger.info(f"Determined domain: {domain}")
             return domain
@@ -378,7 +396,11 @@ class PaperSummarizer:
         try:
             # Check if it's a domain-specific search
             if query.lower().startswith("domain:"):
-                domain = query.split(":", 1)[1].strip()
+                # After
+                if isinstance(query, str) and ":" in query:
+                    domain = query.split(":", 1)[1].strip()
+                else:
+                    domain = str(query).strip() if query else ""
                 papers = self.db_manager.search_by_domain(domain, n_results=n_results)
             else:
                 papers = self.db_manager.search_papers(query, n_results=n_results)

@@ -838,15 +838,42 @@ class LLMInterface:
             model=model,
             temperature=0.3
         )
-        
-        # Extract JSON from the response
+    
+        # Improve the try/except block for JSON parsing
         try:
             # Find JSON in the response (in case there's text before/after)
             json_start = response.find('[')
             json_end = response.rfind(']') + 1
+            
             if json_start >= 0 and json_end > 0:
                 json_str = response[json_start:json_end]
-                recommendations = json.loads(json_str)
+                
+                # Add safety checks and cleanup before parsing
+                try:
+                    recommendations = json.loads(json_str)
+                except json.JSONDecodeError:
+                    # Attempt to clean the JSON string
+                    logger.warning("Initial JSON parsing failed, attempting to clean the response")
+                    
+                    # Simplify overly long author entries (likely hallucinations)
+                    import re
+                    cleaned_json = re.sub(r'\["([^"]+?)"(?:, "R\.)+', '["\\1"', json_str)
+                    cleaned_json = re.sub(r'(R\. ){10,}', 'Various Authors', cleaned_json)
+                    
+                    # Try parsing again with the cleaned JSON
+                    try:
+                        recommendations = json.loads(cleaned_json)
+                    except json.JSONDecodeError:
+                        # If all else fails, return a simplified fallback
+                        logger.error(f"Failed to parse JSON even after cleaning: {json_str[:500]}...")
+                        return [
+                            {
+                                "title": "Error parsing recommendations",
+                                "authors": "N/A",
+                                "year": "",
+                                "relevance": "Failed to generate proper recommendations"
+                            }
+                        ]
             else:
                 # If no JSON array found, try to parse as a JSON object
                 recommendations = json.loads(response)
@@ -855,16 +882,16 @@ class LLMInterface:
                     recommendations = recommendations.get("recommendations", [])
                 
             return recommendations
-            
-        except json.JSONDecodeError:
-            logger.error(f"Failed to parse JSON from response: {response}")
+                
+        except Exception as e:
+            logger.error(f"Failed to parse JSON from response: {response[:500]}...")
             # Return a structured response even if JSON parsing fails
             return [
                 {
                     "title": "Error parsing recommendations",
-                    "authors": "",
+                    "authors": "N/A",
                     "year": "",
-                    "relevance": "Failed to generate proper recommendations"
+                    "relevance": "Failed to generate proper recommendations. Error: " + str(e)
                 }
             ]
     
