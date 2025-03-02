@@ -152,4 +152,8 @@ def mock_summarizer(mock_llm_interface, mock_db_manager):
     
     summarizer.pdf_processor = mock_pdf_processor
     
+    # Add spy for _store_paper_summary method
+    summarizer._store_paper_summary = MagicMock()
+    summarizer._generate_paper_id = MagicMock(return_value="mock123")
+    
     return summarizer

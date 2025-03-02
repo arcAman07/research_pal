@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600">
+  <!-- Background -->
+  <rect width="800" height="600" fill="#1a1a2e" rx="20" ry="20" />
+  
+  <!-- Grid pattern -->
+  <path d="M0 100 L800 100 M0 200 L800 200 M0 300 L800 300 M0 400 L800 400 M0 500 L800 500" stroke="#2a2a4a" stroke-width="1" />
+  <path d="M100 0 L100 600 M200 0 L200 600 M300 0 L300 600 M400 0 L400 600 M500 0 L500 600 M600 0 L600 600 M700 0 L700 600" stroke="#2a2a4a" stroke-width="1" />
+  
+  <!-- Book icon -->
+  <g transform="translate(200, 250) scale(1.5)">
+    <!-- Book cover -->
+    <path d="M20 30 L180 30 L180 210 L20 210 Q10 210 10 200 L10 40 Q10 30 20 30 Z" fill="#0f3460" stroke="#e94560" stroke-width="3" />
+    
+    <!-- Book pages -->
+    <path d="M20 30 L180 30 L180 210 L20 210 C20 170 20 130 20 90 C20 60 20 30 20 30 Z" fill="#0f3460" stroke="#e94560" stroke-width="1" />
+    
+    <!-- Book lines -->
+    <path d="M30 60 L160 60 M30 80 L160 80 M30 100 L160 100 M30 120 L160 120 M30 140 L160 140 M30 160 L120 160" stroke="#16213e" stroke-width="5" />
+    
+    <!-- Book highlights -->
+    <path d="M30 80 L160 80 M30 120 L160 120" stroke="#e94560" stroke-width="5" />
+  </g>
+  
+  <!-- AI Brain & Connections -->
+  <g transform="translate(420, 280)">
+    <!-- Brain outline -->
+    <ellipse cx="60" cy="0" rx="80" ry="70" fill="#16213e" stroke="#e94560" stroke-width="3" />
+    
+    <!-- Circuit pattern -->
+    <path d="M10 -30 L40 -40 L70 -20 M30 0 L50 10 L90 0 M20 20 L50 30 L70 50" stroke="#00a8cc" stroke-width="3" fill="none" />
+    <path d="M40 -40 C50 -50, 60 -50, 70 -20 M50 10 C70 5, 80 5, 90 0 M50 30 C60 35, 65 40, 70 50" stroke="#1089ff" stroke-width="1.5" fill="none" />
+    
+    <!-- Connection nodes -->
+    <circle cx="40" cy="-40" r="4" fill="#00ffff" />
+    <circle cx="70" cy="-20" r="4" fill="#00ffff" />
+    <circle cx="50" cy="10" r="4" fill="#00ffff" />
+    <circle cx="90" cy="0" r="4" fill="#00ffff" />
+    <circle cx="50" cy="30" r="4" fill="#00ffff" />
+    <circle cx="70" cy="50" r="4" fill="#00ffff" />
+  </g>
+  
+  <!-- Digital particles and lines connecting icons -->
+  <g>
+    <path d="M330 250 C350 220, 380 210, 420 210" stroke="#e94560" stroke-width="2" fill="none" />
+    <circle cx="340" cy="240" r="3" fill="#00ffff" />
+    <circle cx="360" cy="225" r="3" fill="#00ffff" />
+    <circle cx="380" cy="215" r="3" fill="#00ffff" />
+    <circle cx="400" cy="210" r="3" fill="#00ffff" />
+  </g>
+  
+  <!-- Text -->
+  <g>
+    <!-- Title -->
+    <text x="400" y="130" font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif" font-size="60" text-anchor="middle" fill="#e94560" font-weight="bold">ResearchPal</text>
+    
+    <!-- Subtitle -->
+    <text x="400" y="180" font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif" font-size="24" text-anchor="middle" fill="#00a8cc">AI-powered Research Assistant</text>
+  </g>
+  
+  <!-- Bottom text -->
+  <text x="400" y="450" font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif" font-size="20" text-anchor="middle" fill="#ffffff">Transform how you work with scientific literature</text>
+  
+  <!-- Glow effects -->
+  <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+    <feGaussianBlur stdDeviation="5" result="blur" />
+    <feComposite in="SourceGraphic" in2="blur" operator="over" />
+  </filter>
+  
+  <!-- Apply glow to certain elements -->
+  <g filter="url(#glow)">
+    <circle cx="340" cy="240" r="2" fill="#00ffff" />
+    <circle cx="360" cy="225" r="2" fill="#00ffff" />
+    <circle cx="380" cy="215" r="2" fill="#00ffff" />
+    <circle cx="400" cy="210" r="2" fill="#00ffff" />
+    <circle cx="40" cy="-40" r="3" fill="#00ffff" transform="translate(420, 280)" />
+    <circle cx="70" cy="-20" r="3" fill="#00ffff" transform="translate(420, 280)" />
+    <circle cx="50" cy="10" r="3" fill="#00ffff" transform="translate(420, 280)" />
+    <circle cx="90" cy="0" r="3" fill="#00ffff" transform="translate(420, 280)" />
+    <circle cx="50" cy="30" r="3" fill="#00ffff" transform="translate(420, 280)" />
+    <circle cx="70" cy="50" r="3" fill="#00ffff" transform="translate(420, 280)" />
+  </g>
+</svg>
