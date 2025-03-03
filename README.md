@@ -1,40 +1,63 @@
-# ResearchPal 🔬📑
+# ResearchPal: AI-Powered Research Assistant
 
 <div align="center">
-  <img src="https://img.shields.io/badge/Python-3.8%2B-blue?style=for-the-badge&logo=python" alt="Python 3.8+">
-  <img src="https://img.shields.io/badge/LLMs-GPT--4o%20%7C%20Gemini-green?style=for-the-badge" alt="LLMs">
-  <img src="https://img.shields.io/badge/Status-Beta-orange?style=for-the-badge" alt="Status">
+  <img src="docs/images/researchpal_logo.svg" alt="ResearchPal Logo" width="300">
+  
+  <p>
+    <img src="https://img.shields.io/badge/Python-3.8%2B-blue?style=flat-square&logo=python" alt="Python 3.8+">
+    <img src="https://img.shields.io/badge/LLMs-GPT--4o%20%7C%20Gemini-green?style=flat-square" alt="LLMs">
+    <img src="https://img.shields.io/badge/Status-Beta-orange?style=flat-square" alt="Status">
+  </p>
+  
+  <h3>Your intelligent companion for scientific literature</h3>
 </div>
 
-<p align="center">
-  <img src="docs/images/researchpal_logo.svg" alt="ResearchPal Logo" width="300">
-</p>
+## Overview
 
-**ResearchPal** is your AI-powered research assistant for scientific literature. It helps you process, understand, and extract insights from research papers with ease.
+**ResearchPal** transforms how researchers interact with scientific literature by leveraging AI to extract, analyze, and organize research papers. It helps you understand papers faster, compare multiple works, generate code implementations, and discuss complex concepts with an AI assistant.
 
-## ✨ Features
+## Key Features
 
-- 📄 **Extract and summarize research papers** from PDFs
-- 🔍 **Search your paper collection** by content, domain, and more
-- 💡 **Generate key takeaways** and important insights automatically
-- 🧠 **Discuss papers** with an AI assistant to deepen understanding
-- 🧮 **Extract mathematical formulations** and model architectures
-- 💻 **Generate implementation code** for described architectures
-- 📝 **Create blog posts** explaining papers in accessible language
-- 🌐 **Domain classification** to organize your research collection
-- 📊 **Interactive interface** with customizable themes
+🔍 **Smart Paper Analysis**
+- Extract and summarize research papers from PDFs
+- Identify key takeaways, methodologies, and insights
+- Classify papers into appropriate research domains
+- Extract mathematical formulations and model architectures
 
-## 🚀 Quick Start
+🔎 **Advanced Search**
+- Find papers by content, domain, title, or specific concepts
+- Semantic search that understands meaning, not just keywords
+- Browse papers by research domain
 
-### Installation
+💬 **AI-Powered Discussion**
+- Ask questions about papers and receive detailed answers
+- Get explanations of complex concepts
+- Explore implications and limitations of research
 
-#### Option 1: Install from PyPI
+🔄 **Multi-Paper Comparison**
+- Compare methodologies, results, and architectures across papers
+- Generate comprehensive comparison reports
+- Identify similarities and differences between approaches
+
+💻 **Code Generation**
+- Automatically implement paper architectures in Python
+- Generate well-commented, working code
+- Support for popular frameworks like PyTorch
+
+📝 **Content Creation**
+- Generate blog posts explaining papers in accessible language
+- Create customized summaries with adjustable detail levels
+- Export summaries to Markdown files
+
+## Installation
+
+### From PyPI (Recommended)
 
 ```bash
 pip install research-pal
 ```
 
-#### Option 2: Install from source
+### From Source
 
 ```bash
 git clone https://github.com/username/research-pal.git
@@ -42,205 +65,194 @@ cd research-pal
 pip install -e .
 ```
 
-### API Keys
-ResearchPal uses LLMs for analysis. You'll need at least one of these API keys:
+## Getting Started
+
+### 1. Configure API Keys
+
+ResearchPal requires at least one of these API keys:
 - [OpenAI API Key](https://platform.openai.com/account/api-keys) (for GPT models)
 - [Google API Key](https://ai.google.dev/) (for Gemini models)
 
-You can set the API keys in any of the following ways:
-1. Environment variables: Set `OPENAI_API_KEY` or `GOOGLE_API_KEY`
-2. Configuration file: Run `research-pal configure` to set up your API keys
-3. Directly in code when using as a library: Pass keys to the `LLMInterface` constructor
+Run the configuration wizard:
 
-### Basic Usage
-
-Launch the interactive shell:
-```bash
-research-pal
-```
-
-Or configure your settings first:
 ```bash
 research-pal configure
 ```
 
-## 🧰 Commands
+### 2. Launch the Interactive Shell
 
-### Interactive Shell Commands
+```bash
+research-pal
+```
+
+### 3. Try Basic Commands
+
+```bash
+# Summarize a paper
+summarize path/to/paper.pdf
+
+# Search your paper collection
+search neural networks
+
+# Open a paper and discuss it
+open abc123
+discuss What are the key innovations in this paper?
+```
+
+## Command Reference
+
+### Paper Management
 
 | Command | Description |
 |---------|-------------|
-| `search <query> [-n <count>]` | Search for papers in the database |
-| `search domain:<domain_name>` | Search for papers in a specific research domain |
-| `open <paper_id>` | Open a paper and set it as current context |
-| `show <section>` | Show a section of current paper (summary, takeaways, etc.) |
-| `discuss <question>` | Discuss the current paper with the AI assistant |
+| `search <query> [-n <count>]` | Search for papers |
+| `search domain:<domain>` | Search by research domain |
+| `search title:<title>` | Search by paper title |
+| `search takeaway:<concept>` | Search in paper takeaways |
+| `open <paper_id>` | Open a paper |
+| `history [<count>]` | Show recently opened papers |
+| `switch <number>` | Switch to a paper from history |
+
+### Paper Analysis
+
+| Command | Description |
+|---------|-------------|
+| `show <section>` | Show a section of current paper |
+| `show all` | Display full paper summary |
+| `discuss <question>` | Discuss the current paper |
+| `add <field> <content>` | Add info to current paper |
+
+### Paper Processing
+
+| Command | Description |
+|---------|-------------|
 | `summarize <pdf_path>` | Summarize a new paper |
-| `summarize <pdf_path> [--token-limit <limit>]` | Summarize with custom token limit |
-| `generate code\|blog` | Generate code implementation or blog post |
-| `theme <theme_name>` | Change the UI theme (cyberpunk, matrix, midnight) |
+| `summarize <pdf_path> --output <path>` | Save summary to path |
+| `summarize <pdf_path> --force` | Re-summarize existing paper |
+| `summarize <pdf_path> --code` | Generate implementation code |
+| `summarize <pdf_path> --blog` | Generate blog post |
+| `generate code` | Generate code for current paper |
+| `generate blog` | Generate blog post for current paper |
+| `export <file_path>` | Export current paper to file |
 
-## 📚 Examples
+### Paper Comparison
 
-### Summarize a paper
+| Command | Description |
+|---------|-------------|
+| `compare_add [<paper_id>]` | Add paper to comparison list |
+| `compare_remove <index>` | Remove paper from comparison |
+| `compare_list` | List papers for comparison |
+| `compare_clear` | Clear comparison list |
+| `compare [<aspect>]` | Generate comparison |
+
+### Interface Control
+
+| Command | Description |
+|---------|-------------|
+| `theme <theme_name>` | Change UI theme |
+| `debug on\|off` | Toggle debug mode |
+| `clear` | Clear screen |
+| `exit`, `quit` | Exit the shell |
+| `help [<command>]` | Show help |
+
+## Examples
+
+### Summarizing a Paper
+
 ```bash
-> summarize path/to/paper.pdf
+> summarize ~/papers/transformer.pdf
 ```
 
-### Generate implementation code
+![Summary Example](docs/images/summary_example.png)
+
+### Saving a Summary to a Specific Location
+
 ```bash
-> summarize path/to/paper.pdf --code
+> summarize path/to/paper.pdf --output ~/research/summaries/paper_summary.md
 ```
 
-### Generate a blog post
+### Comparing Multiple Papers
+
 ```bash
-> summarize path/to/paper.pdf --blog
+> search title:Transformer
+> open abc123
+> compare_add
+> search title:BERT
+> open def456
+> compare_add
+> compare methodology
 ```
 
-### Search for papers in a specific domain
+### Discussing a Paper
+
 ```bash
-> search domain:Reinforcement Learning
+> open abc123
+> discuss What are the key innovations in this paper?
 ```
 
-### Discuss a paper with the AI assistant
+### Finding Papers by Domain
+
 ```bash
-> open 8f7e9a1b2c
-> discuss What are the limitations of this approach?
+> search domain:Computer Vision
 ```
 
-## 🧩 Advanced Settings
+## Advanced Settings
 
-You can customize ResearchPal's behavior by editing your configuration:
+Configure ResearchPal's behavior:
 
 ```bash
 research-pal configure
 ```
 
 Options include:
-- Default LLM model selection
+- LLM model selection
 - Output token limits
 - Database location
-- Output directory for generated files
+- Output directory
 - Theme preferences
 
-## 🏗️ Project Structure
+## Development and Testing
 
-```
-research_pal/
-├── cli/                # Command-line interface
-│   ├── __init__.py     
-│   ├── interactive.py  # Interactive shell
-│   └── main.py         # Entry point
-├── core/               # Core functionality
-│   ├── __init__.py
-│   ├── llm_interface.py # LLM API interactions
-│   ├── pdf_processor.py # PDF extraction
-│   ├── prompts.py      # System prompts
-│   └── summarizer.py   # Paper summarization
-├── db/                 # Database management
-│   ├── __init__.py
-│   └── chroma_manager.py # Vector database
-├── utils/              # Utilities
-│   ├── __init__.py
-│   ├── config.py       # Configuration handling
-│   ├── display.py      # Display functions
-│   └── ui_themes.py    # Advanced UI
-└── tests/              # Test suite
-    ├── __init__.py
-    ├── conftest.py     # Test fixtures
-    ├── test_llm_interface.py
-    ├── test_pdf_processor.py
-    ├── test_summarizer.py
-    └── test_chroma_manager.py
+### Setting Up Development Environment
+
+```bash
+# Clone repository
+git clone https://github.com/username/research-pal.git
+cd research-pal
+
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install in development mode
+pip install -e ".[dev]"
 ```
 
-## 🧪 Development and Testing
-
-### Setting Up a Development Environment
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/username/research-pal.git
-   cd research-pal
-   ```
-
-2. Create a virtual environment:
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   ```
-
-3. Install in development mode:
-   ```bash
-   pip install -e ".[dev]"
-   ```
-
-### Running the Tests
-
-Run the test suite to ensure everything is working correctly:
+### Running Tests
 
 ```bash
 pytest
+pytest -v  # For verbose output
+pytest --cov=research_pal  # For coverage information
 ```
 
-For more detailed test output:
-
-```bash
-pytest -v
-```
-
-For code coverage information:
-
-```bash
-pytest --cov=research_pal
-```
-
-### API Key Setup for Testing
-
-For testing, you can use any of these methods to set up your API keys:
-
-1. Create a `.env` file in the project root:
-   ```
-   OPENAI_API_KEY=your_openai_key_here
-   GOOGLE_API_KEY=your_google_key_here
-   ```
-
-2. Export as environment variables in your terminal:
-   ```bash
-   export OPENAI_API_KEY=your_openai_key_here
-   export GOOGLE_API_KEY=your_google_key_here
-   ```
-
-3. Use the configuration utility:
-   ```bash
-   research-pal configure
-   ```
-
-## 📋 Requirements
-
-- Python 3.8+
-- Required packages (automatically installed):
-  - rich
-  - click
-  - httpx
-  - tenacity
-  - chromadb
-  - pdfminer.six
-  - pyyaml
-
-## 📖 Documentation
+## Documentation
 
 Comprehensive documentation is available in the [docs](docs/) directory.
 
-## 🤝 Contributing
+## Troubleshooting
 
-Contributions are welcome! Check out [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+See the [Troubleshooting Guide](docs/troubleshooting.md) for solutions to common issues.
 
-## 📄 License
+## Contributing
+
+Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🙏 Acknowledgements
+## Acknowledgements
 
 - Built with [OpenAI](https://openai.com/) and [Google Gemini](https://deepmind.google/technologies/gemini/) APIs
 - Uses [ChromaDB](https://www.trychroma.com/) for vector storage
